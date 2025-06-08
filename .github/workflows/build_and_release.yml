@@ -23,13 +23,58 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller pyautogui
 
+    - name: Verify icon file exists
+      run: |
+        if (Test-Path "assets/app_icon.ico") {
+          Write-Host "Icon file found: assets/app_icon.ico"
+          Get-Item "assets/app_icon.ico" | Select-Object Name, Length
+        } else {
+          Write-Host "Icon file not found, listing assets directory:"
+          Get-ChildItem "assets/" -ErrorAction SilentlyContinue
+        }
+      shell: powershell
+
     - name: Build executable with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --icon=app_icon.ico auto_typer_gui.py --hidden-import=pyautogui
+        pyinstaller --onefile --windowed --icon=assets/app_icon.ico auto_typer_gui.py --hidden-import=pyautogui --name=AutoTyper
+
+    - name: Verify build output
+      run: |
+        if (Test-Path "dist/AutoTyper.exe") {
+          Write-Host "Build successful! AutoTyper.exe created"
+          Get-Item "dist/AutoTyper.exe" | Select-Object Name, Length, LastWriteTime
+        } else {
+          Write-Host "Build failed - executable not found"
+          Get-ChildItem "dist/" -ErrorAction SilentlyContinue
+        }
+      shell: powershell
 
     - name: Upload release
       uses: softprops/action-gh-release@v2
       with:
-        files: dist/auto_typer_gui.exe
+        files: |
+          dist/AutoTyper.exe
+        name: AutoTyper ${{ github.ref_name }}
+        body: |
+          ## AutoTyper Release ${{ github.ref_name }}
+          
+          **Features:**
+          - GUI-based auto typing application
+          - Adjustable typing speed
+          - Load text from files or type directly
+          - Start/Stop functionality
+          - Modern UI with 3D button effects
+          
+          **Installation:**
+          1. Download `AutoTyper.exe`
+          2. Run the executable (no installation required)
+          
+          **Usage:**
+          1. Enter or load your text
+          2. Set desired typing speed
+          3. Click "Start Typing" and switch to target application
+          4. The app will begin typing after a 5-second delay
+        draft: false
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

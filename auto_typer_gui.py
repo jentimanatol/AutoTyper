@@ -1,3 +1,5 @@
+# pip install pyautogui
+
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import pyautogui
@@ -8,54 +10,78 @@ class AutoTyperApp:
     def __init__(self, master):
         self.master = master
         master.title("Created by Anatolie Jentimir")
-        master.geometry("1800x1200")
+        master.geometry("1000x900")
+        master.configure(bg='#2c3e50')  # Dark blue-gray background
         
         self.typing = False
         self.delay = 0.5
         
         # --- Top button frame ---
-        self.button_frame = tk.Frame(master)
-        self.button_frame.pack(pady=10)
         
-        self.browse_button = tk.Button(self.button_frame, text="Browse Text File", command=self.browse_file)
-        self.browse_button.pack(side=tk.LEFT, padx=5)
+        self.button_frame = tk.Frame(master, bg='#34495e')  # Slightly lighter blue-gray
+        self.button_frame.pack(pady=10, padx=10, fill=tk.X)
         
-        self.start_button = tk.Button(self.button_frame, text="Start Typing", command=self.start_typing)
-        self.start_button.pack(side=tk.LEFT, padx=5)
+        self.browse_button = tk.Button(self.button_frame, text="Browse Text File", command=self.browse_file,
+                                     bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                     activebackground='#6c7b7f', activeforeground='white',
+                                     relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.browse_button.pack(side=tk.LEFT, padx=5, pady=5)
         
-        self.stop_button = tk.Button(self.button_frame, text="Stop Typing", command=self.stop_typing)
-        self.stop_button.pack(side=tk.LEFT, padx=5)
+        self.start_button = tk.Button(self.button_frame, text="Start Typing", command=self.start_typing,
+                                    bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                    activebackground='#6c7b7f', activeforeground='white',
+                                    relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.start_button.pack(side=tk.LEFT, padx=5, pady=5)
         
-        self.exit_button = tk.Button(self.button_frame, text="Exit", command=self.exit_app)
-        self.exit_button.pack(side=tk.LEFT, padx=5)
+        self.stop_button = tk.Button(self.button_frame, text="Stop Typing", command=self.stop_typing,
+                                   bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                   activebackground='#6c7b7f', activeforeground='white',
+                                   relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.stop_button.pack(side=tk.LEFT, padx=5, pady=5)
         
-        self.speed_label = tk.Label(self.button_frame, text="Delay (s/char):")
-        self.speed_label.pack(side=tk.LEFT, padx=(20, 5))
+        self.exit_button = tk.Button(self.button_frame, text="Exit", command=self.exit_app,
+                                   bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                   activebackground='#6c7b7f', activeforeground='white',
+                                   relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.exit_button.pack(side=tk.LEFT, padx=5, pady=5)
         
-        self.speed_scale = tk.Scale(self.button_frame, from_=0.01, to=1.0, resolution=0.01,
-                                   orient=tk.HORIZONTAL, length=200, command=self.update_speed)
+        self.speed_label = tk.Label(self.button_frame, text="Delay (s/char):",
+                                  bg='#34495e', fg='white', font=('Arial', 10))
+        self.speed_label.pack(side=tk.LEFT, padx=(20, 5), pady=5)
+        
+        self.speed_scale = tk.Scale(self.button_frame, from_=0.001, to=1.0, resolution=0.001,
+                                   orient=tk.HORIZONTAL, length=200, command=self.update_speed,
+                                   bg='#34495e', fg='white', activebackground='#3498db',
+                                   highlightbackground='#34495e', troughcolor='#2c3e50')
         self.speed_scale.set(self.delay)
-        self.speed_scale.pack(side=tk.LEFT)
+        self.speed_scale.pack(side=tk.LEFT, pady=5)
         
         # --- Text editing label ---
-        self.edit_label = tk.Label(master, text="Edit your text directly below or load from a file:")
+        self.edit_label = tk.Label(master, text="Edit your text directly below or load from a file:",
+                                 bg='#2c3e50', fg='white', font=('Arial', 12))
         self.edit_label.pack(pady=(10, 5))
         
         # --- Text display with scrollbar ---
-        self.text_frame = tk.Frame(master)
+        self.text_frame = tk.Frame(master, bg='#2c3e50')
         self.text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
-        self.text_display = tk.Text(self.text_frame, wrap=tk.WORD)
+        self.text_display = tk.Text(self.text_frame, wrap=tk.WORD,
+                                  bg='#ecf0f1', fg='#2c3e50', font=('Consolas', 11),
+                                  insertbackground='#2c3e50', selectbackground='#3498db',
+                                  selectforeground='white')
         self.text_display.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        self.scrollbar = tk.Scrollbar(self.text_frame, command=self.text_display.yview)
+        self.scrollbar = tk.Scrollbar(self.text_frame, command=self.text_display.yview,
+                                    bg='#34495e', activebackground='#3498db',
+                                    troughcolor='#2c3e50')
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
         self.text_display.config(yscrollcommand=self.scrollbar.set)
         
         # --- Status bar ---
-        self.status_bar = tk.Label(master, text="Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W)
-        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.status_bar = tk.Label(master, text="Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W,
+                                 bg='#34495e', fg='white', font=('Arial', 10))
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
 
     def browse_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])

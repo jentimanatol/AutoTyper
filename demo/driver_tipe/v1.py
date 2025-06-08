@@ -17,4 +17,4 @@ if __name__ == "__main__":
     auto_type(sample_text, delay=0.5)
 
 
-# This is an automated typing example.
+# This is an automated typing example. e
