@@ -13,6 +13,22 @@ class AutoTyperApp:
         master.geometry("1000x900")
         master.configure(bg='#2c3e50')  # Dark blue-gray background
         
+        # Set window icon - try different icon files
+        try:
+            # Try the 32x32 icon first (best for window title bar)
+            master.iconbitmap("assets/app_icon_32×32.ico")
+        except:
+            try:
+                # Fallback to the 256x256 icon
+                master.iconbitmap("assets/app_icon_256×256.ico")
+            except:
+                try:
+                    # Final fallback to the main icon
+                    master.iconbitmap("assets/app_icon.ico")
+                except:
+                    # If all fail, continue without custom icon
+                    pass
+        
         self.typing = False
         self.delay = 0.5
         
@@ -49,7 +65,7 @@ class AutoTyperApp:
                                   bg='#34495e', fg='white', font=('Arial', 10))
         self.speed_label.pack(side=tk.LEFT, padx=(20, 5), pady=5)
         
-        self.speed_scale = tk.Scale(self.button_frame, from_=0.001, to=1.0, resolution=0.001,
+        self.speed_scale = tk.Scale(self.button_frame, from_=0.01, to=1.0, resolution=0.01,
                                    orient=tk.HORIZONTAL, length=200, command=self.update_speed,
                                    bg='#34495e', fg='white', activebackground='#3498db',
                                    highlightbackground='#34495e', troughcolor='#2c3e50')

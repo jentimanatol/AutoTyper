@@ -1,9 +1,9 @@
 git --version
 git add .
-git commit -m "Add some color "
+git commit -m "Add Logo to the windows installer"
 git push origin main
 
 :: === Tagging for GitHub Actions Release Build ===
-git tag v1.2
-git push origin v1.2
+git tag v2.0
+git push origin v2.0
 pause
