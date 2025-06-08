@@ -1,3 +1,0 @@
-To decide whether to reject or fail to reject the null hypothesis, we can use either the P-value method or the critical value method. In the P-value method, if the P-value is less than or equal to the significance level (usually 0.05), we reject the null hypothesis. Otherwise, we fail to reject it. For example, if a test gives a P-value of 0.03, we reject the null hypothesis at the 0.05 level. In the critical value method, we compare the test statistic to a critical value. If the test statistic falls into the critical region, we reject the null. Both methods help us determine whether the sample data provides enough evidence against the null hypothesis.
-
-used only in diffeent sistem under content but easy content
