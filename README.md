@@ -97,8 +97,10 @@ pyinstaller --onefile --windowed --icon=assets/app_icon.ico auto_typer_gui.py --
 
 ## 📸 Screenshots
 
-![Main Interface](screenshots/Screenshot1.jpg)
+![Main Interface](screenshots/Screenshot2.jpg)
 *Clean, professional interface with intuitive controls*
+![Main Interface](screenshots/Screenshot1.jpg)
+
 
 ![File Integration](screenshots/main_gui.png)
 *Seamless file loading with live editing capabilities*
