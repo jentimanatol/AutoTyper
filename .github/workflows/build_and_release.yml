@@ -1,80 +1,165 @@
-name: Build and Release EXE
+# pip install pyautogui
 
-on:
-  push:
-    tags:
-      - 'v*'
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import pyautogui
+import time
+import threading
+import sys
+import os
 
-jobs:
-  build:
-    runs-on: windows-latest
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+class AutoTyperApp:
+    def __init__(self, master):
+        self.master = master
+        master.title("Created by Anatolie Jentimir")
+        master.geometry("1000x900")
+        master.configure(bg='#2c3e50')  # Dark blue-gray background
+        
+        # Set window icon - try different icon files
+        try:
+            # Try the 32x32 icon first (best for window title bar)
+            icon_path = resource_path("assets/app_icon_32×32.ico")
+            master.iconbitmap(icon_path)
+        except:
+            try:
+                # Fallback to the 256x256 icon
+                icon_path = resource_path("assets/app_icon_256×256.ico")
+                master.iconbitmap(icon_path)
+            except:
+                try:
+                    # Final fallback to the main icon
+                    icon_path = resource_path("assets/app_icon.ico")
+                    master.iconbitmap(icon_path)
+                except:
+                    # If all fail, continue without custom icon
+                    pass
+        
+        self.typing = False
+        self.delay = 0.5
+        
+        # --- Top button frame ---
+        
+        self.button_frame = tk.Frame(master, bg='#34495e')  # Slightly lighter blue-gray
+        self.button_frame.pack(pady=10, padx=10, fill=tk.X)
+        
+        self.browse_button = tk.Button(self.button_frame, text="Browse Text File", command=self.browse_file,
+                                     bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                     activebackground='#6c7b7f', activeforeground='white',
+                                     relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.browse_button.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        self.start_button = tk.Button(self.button_frame, text="Start Typing", command=self.start_typing,
+                                    bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                    activebackground='#6c7b7f', activeforeground='white',
+                                    relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.start_button.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        self.stop_button = tk.Button(self.button_frame, text="Stop Typing", command=self.stop_typing,
+                                   bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                   activebackground='#6c7b7f', activeforeground='white',
+                                   relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.stop_button.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        self.exit_button = tk.Button(self.button_frame, text="Exit", command=self.exit_app,
+                                   bg='#7f8c8d', fg='white', font=('Arial', 10, 'bold'),
+                                   activebackground='#6c7b7f', activeforeground='white',
+                                   relief=tk.RAISED, bd=3, padx=10, pady=5)
+        self.exit_button.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        self.speed_label = tk.Label(self.button_frame, text="Delay (s/char):",
+                                  bg='#34495e', fg='white', font=('Arial', 10))
+        self.speed_label.pack(side=tk.LEFT, padx=(20, 5), pady=5)
+        
+        self.speed_scale = tk.Scale(self.button_frame, from_=0.01, to=1.0, resolution=0.01,
+                                   orient=tk.HORIZONTAL, length=200, command=self.update_speed,
+                                   bg='#34495e', fg='white', activebackground='#3498db',
+                                   highlightbackground='#34495e', troughcolor='#2c3e50')
+        self.speed_scale.set(self.delay)
+        self.speed_scale.pack(side=tk.LEFT, pady=5)
+        
+        # --- Text editing label ---
+        self.edit_label = tk.Label(master, text="Edit your text directly below or load from a file:",
+                                 bg='#2c3e50', fg='white', font=('Arial', 12))
+        self.edit_label.pack(pady=(10, 5))
+        
+        # --- Text display with scrollbar ---
+        self.text_frame = tk.Frame(master, bg='#2c3e50')
+        self.text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        self.text_display = tk.Text(self.text_frame, wrap=tk.WORD,
+                                  bg='#ecf0f1', fg='#2c3e50', font=('Consolas', 11),
+                                  insertbackground='#2c3e50', selectbackground='#3498db',
+                                  selectforeground='white')
+        self.text_display.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.scrollbar = tk.Scrollbar(self.text_frame, command=self.text_display.yview,
+                                    bg='#34495e', activebackground='#3498db',
+                                    troughcolor='#2c3e50')
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.text_display.config(yscrollcommand=self.scrollbar.set)
+        
+        # --- Status bar ---
+        self.status_bar = tk.Label(master, text="Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W,
+                                 bg='#34495e', fg='white', font=('Arial', 10))
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+    def browse_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
+        if file_path:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                loaded_text = f.read()
+            self.text_display.delete(1.0, tk.END)
+            self.text_display.insert(tk.END, loaded_text)
+            self.update_status("File loaded. You can edit the text before typing.")
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller pyautogui
+    def update_speed(self, value):
+        self.delay = float(value)
 
-    - name: Verify icon file exists
-      run: |
-        if (Test-Path "assets/app_icon.ico") {
-          Write-Host "Icon file found: assets/app_icon.ico"
-          Get-Item "assets/app_icon.ico" | Select-Object Name, Length
-        } else {
-          Write-Host "Icon file not found, listing assets directory:"
-          Get-ChildItem "assets/" -ErrorAction SilentlyContinue
-        }
-      shell: powershell
+    def type_text(self):
+        time.sleep(5)  # Give user time to switch to target application
+        # Get the current text from the text display widget
+        text_to_type = self.text_display.get(1.0, tk.END)
+        for char in text_to_type:
+            if not self.typing:
+                break
+            pyautogui.write(char)
+            time.sleep(self.delay)
+        self.typing = False
+        if self.typing == False:
+            self.update_status("Typing completed or stopped.")
 
-    - name: Build executable with PyInstaller
-      run: |
-        pyinstaller --onefile --windowed --icon=assets/app_icon.ico auto_typer_gui.py --hidden-import=pyautogui --name=AutoTyper
+    def start_typing(self):
+        # Check if there's any text in the text display
+        if not self.text_display.get(1.0, tk.END).strip():
+            messagebox.showwarning("Warning", "No text to type! Please enter text or load a file.")
+            return
+        
+        self.update_status("Starting typing in 5 seconds... Switch to your target application!")
+        self.typing = True
+        threading.Thread(target=self.type_text, daemon=True).start()
 
-    - name: Verify build output
-      run: |
-        if (Test-Path "dist/AutoTyper.exe") {
-          Write-Host "Build successful! AutoTyper.exe created"
-          Get-Item "dist/AutoTyper.exe" | Select-Object Name, Length, LastWriteTime
-        } else {
-          Write-Host "Build failed - executable not found"
-          Get-ChildItem "dist/" -ErrorAction SilentlyContinue
-        }
-      shell: powershell
+    def stop_typing(self):
+        self.typing = False
+        self.update_status("Typing stopped.")
 
-    - name: Upload release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          dist/AutoTyper.exe
-        name: AutoTyper ${{ github.ref_name }}
-        body: |
-          ## AutoTyper Release ${{ github.ref_name }}
-          
-          **Features:**
-          - GUI-based auto typing application
-          - Adjustable typing speed
-          - Load text from files or type directly
-          - Start/Stop functionality
-          - Modern UI with 3D button effects
-          
-          **Installation:**
-          1. Download `AutoTyper.exe`
-          2. Run the executable (no installation required)
-          
-          **Usage:**
-          1. Enter or load your text
-          2. Set desired typing speed
-          3. Click "Start Typing" and switch to target application
-          4. The app will begin typing after a 5-second delay
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    def update_status(self, message):
+        self.status_bar.config(text=message)
+
+    def exit_app(self):
+        self.typing = False
+        self.master.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AutoTyperApp(root)
+    root.mainloop()

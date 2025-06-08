@@ -5,17 +5,6 @@ from tkinter import filedialog, messagebox
 import pyautogui
 import time
 import threading
-import sys
-import os
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 class AutoTyperApp:
     def __init__(self, master):
@@ -27,18 +16,15 @@ class AutoTyperApp:
         # Set window icon - try different icon files
         try:
             # Try the 32x32 icon first (best for window title bar)
-            icon_path = resource_path("assets/app_icon_32×32.ico")
-            master.iconbitmap(icon_path)
+            master.iconbitmap("assets/app_icon_32×32.ico")
         except:
             try:
                 # Fallback to the 256x256 icon
-                icon_path = resource_path("assets/app_icon_256×256.ico")
-                master.iconbitmap(icon_path)
+                master.iconbitmap("assets/app_icon_256×256.ico")
             except:
                 try:
                     # Final fallback to the main icon
-                    icon_path = resource_path("assets/app_icon.ico")
-                    master.iconbitmap(icon_path)
+                    master.iconbitmap("assets/app_icon.ico")
                 except:
                     # If all fail, continue without custom icon
                     pass
